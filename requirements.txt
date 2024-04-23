@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+SpeechRecognition
+nltk
+# tenha instalado na maquina o ffmpeg
+# uvicorn main:app --host 0.0.0.0 --port 8000

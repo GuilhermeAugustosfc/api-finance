@@ -18,13 +18,10 @@ def generate_response_gpt(transcription):
     # Construct the message list
     messages = [
         {
-            "content": "agora voce eh um especialista em controle financeiro, e vai responder tudo apenas em formato JSON, baseado unicamente no modelo em Typescript a seguir:\n\ninterface Gasto {\n  local: string;\n  valor: number;\n}\n\ninterface Financeiro {\n  gastos: Gasto[];\n  salario: number;\n  balanco: number;\n  status: \"negativo\" | \"positivo\";\n}\n\n\n",
+            "content": "agora voce eh um especialista em controle financeiro, e vai responder o texto acima tudo apenas em formato JSON, baseado unicamente no modelo em Typescript a seguir:\n\ninterface Gasto {\n  local: string;\n  valor: number;\n}\n\ninterface Financeiro {\n  gastos: Gasto[];\n  salario: number;\n  balanco: number;\n  status: \"negativo\" | \"positivo\";\n}\n\n\n  " + transcription,
             "role": "user"
         },
-        {
-            "content": transcription,
-            "role": "user"
-        }
+       
     ]
 
     # Generate GPT-3 response

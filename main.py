@@ -8,7 +8,7 @@ from transcribe import transcribe_audio
 from gpt3_utils import generate_response_gpt
 
 app = FastAPI()
-# Adicionar configuração para aceitar solicitações de qualquer origem
+# Adicionar configuração para aceitar solicitações de qualquer origem.
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Permitir solicitações de qualquer origem

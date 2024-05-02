@@ -20,7 +20,7 @@ app.add_middleware(
 class Audio(BaseModel):
     audio_file: str
 
-
+# falmosntrooooooooooooo
 @app.post("/cadastrar_gasto/")
 async def cadastrar_gasto(audio: Audio):
     audio_bytes = decode_audio(audio)

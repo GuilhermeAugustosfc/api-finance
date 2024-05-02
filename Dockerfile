@@ -2,7 +2,7 @@
 FROM python:3.9-slim
 
 # Instale o ffmpeg
-RUN apt-get update && apt-get install -y ffmpeg
+RUN apt-get update && apt-get install -y ffmpeg flac
 
 # Defina o diretório de trabalho dentro do contêiner
 WORKDIR /app

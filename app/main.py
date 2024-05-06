@@ -6,7 +6,8 @@ import speech_recognition as sr
 from audio_utils import decode_audio, create_audio
 from transcribe import transcribe_audio
 from gpt3_utils import generate_response_gpt
-
+from driver.mongo import get_db_mongo
+from model.operacao_model import OperacaoModel
 app = FastAPI()
 # Adicionar configuração para aceitar solicitações de qualquer origem.
 app.add_middleware(
@@ -20,7 +21,7 @@ app.add_middleware(
 class Audio(BaseModel):
     audio_file: str
 
-# falmosntrooooooooooooo
+  
 @app.post("/cadastrar_gasto/")
 async def cadastrar_gasto(audio: Audio):
     audio_bytes = decode_audio(audio)
@@ -36,6 +37,9 @@ async def cadastrar_gasto(audio: Audio):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+    db = get_db_mongo()
+    model = OperacaoModel(db)
+    model.criar_operacao(response)
     return response
 
 if __name__ == "__main__":

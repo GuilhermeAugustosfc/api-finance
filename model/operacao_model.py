@@ -1,11 +1,11 @@
-
+from pymongo.database import Database
 class OperacaoModel:
-    def __init__(self, db):
+    def __init__(self, db: Database):
         self.collection = db["operacao"]
-
     def criar_operacao(self, operacao):
         # Insere um novo documento na coleção
-        self.collection.insert_one(operacao)
+        result = self.collection.insert_one(operacao)
+        return result.inserted_id
 
     def buscar_operacao_por_id(self, operacao_id):
         # Busca um documento pelo ID

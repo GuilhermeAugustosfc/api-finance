@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0.31
+    container_name: mysql
+    restart: unless-stopped
+    tty: true
+    environment:
+      MYSQL_ROOT_PASSWORD: myfintechcode
+      MYSQL_DATABASE: myfintechdatabase
+      MYSQL_USER: myfintech
+      MYSQL_PASSWORD: myfintechcode
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    ports:
+      - "3306:3306"  # Mapeie a porta 3306 do container para a porta 3306 do host
+    networks:
+      - myfintechnetwork
+
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_URI=mongodb+srv://guilhermeaugustosfc1:aIVlKXsQV0FNC3Pu@cluster0.yiwrufx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0&tlsAllowInvalidCertificates=true
+      - PYTHONPATH=${PYTHONPATH}:/repository:/database:/model
+    networks:
+      - myfintechnetwork
+    depends_on:
+      - db
+
+networks:
+  myfintechnetwork:
+    driver: bridge

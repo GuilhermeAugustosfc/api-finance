@@ -17,6 +17,7 @@ from model.TokenModel import AccessToken, RefreshToken, OAuth2Client
 from sqlalchemy.orm import Session
 from oauthlib.common import generate_token
 from model.TokenModel import generate_client_secret
+import mysql.connector
 
 MySQL.create_tables()
 
@@ -93,6 +94,23 @@ async def create_operacao(operacao: Operacao):
         return {"message": "Operação criada com sucesso"}
     else:
         raise HTTPException(status_code=500, detail="Erro ao criar a operação")
+
+
+@app.get("/testeRDS")
+async def get_rds_test_file():
+    config = {
+        "host": "database-1.cpigwcyuk6vv.us-east-2.rds.amazonaws.com",
+        "user": "admin",
+        "password": "SO9yvDX5GwQfF1EWEM5u",
+    }
+    db = mysql.connector.connect(**config)
+    cursor = db.cursor()
+    cursor.execute("USE teste")
+    cursor.execute("SELECT * FROM clientes")
+    resultados = cursor.fetchall()
+    cursor.close()
+    db.close()
+    return resultados
 
 
 # Implementação do OAuth2

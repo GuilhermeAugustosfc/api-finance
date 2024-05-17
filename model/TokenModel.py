@@ -41,3 +41,4 @@ class RefreshToken(Base):
     expire_at = Column(DateTime)
     access_token_id = Column(Integer, ForeignKey("access_tokens.id"))
     access_token = relationship("AccessToken")
+

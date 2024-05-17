@@ -1,25 +1,12 @@
 version: '3.8'
 
 services:
-  db:
-    image: mysql:8.0.31
-    container_name: mysql
-    restart: unless-stopped
-    tty: true
-    environment:
-      MYSQL_ROOT_PASSWORD: myfintechcode
-      MYSQL_DATABASE: myfintechdatabase
-      MYSQL_USER: myfintech
-      MYSQL_PASSWORD: myfintechcode
-      SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
-    ports:
-      - "3306:3306"  # Mapeie a porta 3306 do container para a porta 3306 do host
-    networks:
-      - myfintechnetwork
-
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile  # Use o Dockerfile personalizado
+      target: api
+    platform: linux/amd64  # Especifique a arquitetura da imagem
     ports:
       - "8000:8000"
     environment:
@@ -27,8 +14,6 @@ services:
       - PYTHONPATH=${PYTHONPATH}:/repository:/database:/model
     networks:
       - myfintechnetwork
-    depends_on:
-      - db
 
 networks:
   myfintechnetwork:

@@ -2,7 +2,7 @@ import mysql.connector
 from mysql.connector import Error
 
 
-def get_instance():
+def get_db_mysql_instance():
     config = {
         "host": "database-1.cpigwcyuk6vv.us-east-2.rds.amazonaws.com",
         "user": "admin",
@@ -16,6 +16,7 @@ def get_instance():
             cursor = db.cursor()
             print("Successfully connected to the database")
             return cursor
+        return None
     except Error as e:
         print(f"Error connecting to MySQL: {e}")
         return None

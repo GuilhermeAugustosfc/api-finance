@@ -1,25 +1,27 @@
 from fastapi import FastAPI, HTTPException, Depends, status
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-import speech_recognition as sr
-import datetime
 from audio_utils import decode_audio, create_audio
 from transcribe import transcribe_audio
 from gpt3_utils import generate_response_gpt
-from driver.mongo import get_db_mongo
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from auth_utils import (
+    authenticate_user,
+    create_refresh_token_pair,
+)
+from db_operations import (
+    register_user,
+    create_user_tokens,
+    insert_operacao_mongo,
+)
 
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Permitir solicitações de qualquer origem
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=[
-        "GET",
-        "POST",
-        "PUT",
-        "DELETE",
-    ],  # Permitir os métodos GET, POST, PUT, DELETE
-    allow_headers=["*"],  # Permitir todos os cabeçalhos
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
+    allow_headers=["*"],
 )
 
 
@@ -27,12 +29,14 @@ class Audio(BaseModel):
     audio_file: str
 
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
 @app.post("/cadastrar_gasto/")
 async def cadastrar_gasto(audio: Audio):
     audio_bytes = decode_audio(audio)
     create_audio(audio_bytes, "audio_decoded.wav", "wav")
 
-    # Transcrever o áudio
     try:
         transcription = transcribe_audio()
     except Exception as e:
@@ -43,9 +47,6 @@ async def cadastrar_gasto(audio: Audio):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    # db = get_db_mongo()
-    # model = OperacaoModel(db)
-    # model.criar_operacao(response)
     return response
 
 
@@ -58,30 +59,51 @@ class Operacao(BaseModel):
     source: str
 
 
-@app.post("/operacoes/")
-async def create_operacao(operacao: Operacao):
-    # Converter a string de data para o formato datetime
-    # operacao_date = datetime.datetime.fromisoformat(operacao.date)
-    db = get_db_mongo()
-    operacoes_collection = db["operacoes"]
-    # Criar o documento da operação
-    operacao_doc = {
-        "user_id": operacao.user_id,
-        "type": operacao.type,
-        "amount": operacao.amount,
-        "date": operacao.date,
-        "description": operacao.description,
-        "source": operacao.source,
+@app.post("/register")
+def register(username: str, password: str):
+    try:
+        register_user(username, password)
+    except HTTPException as e:
+        raise e
+    return {"msg": "User registered successfully"}
+
+
+@app.post("/token")
+def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    try:
+        user = authenticate_user(form_data.username, form_data.password)
+        access_token, refresh_token = create_user_tokens(user)
+    except HTTPException as e:
+        raise e
+
+    return {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "token_type": "bearer",
     }
 
-    # Inserir a operação no MongoDB
-    result = operacoes_collection.insert_one(operacao_doc)
 
-    # Verificar se a operação foi inserida com sucesso
-    if result.inserted_id:
-        return {"message": "Operação criada com sucesso"}
-    else:
-        raise HTTPException(status_code=500, detail="Erro ao criar a operação")
+@app.post("/refresh_token")
+def refresh_access_token(refresh_token: str):
+    try:
+        access_token, new_refresh_token = create_refresh_token_pair(refresh_token)
+    except HTTPException as e:
+        raise e
+
+    return {
+        "access_token": access_token,
+        "refresh_token": new_refresh_token,
+        "token_type": "bearer",
+    }
+
+
+@app.post("/operacoes/")
+async def create_operacao(operacao: Operacao):
+    try:
+        insert_operacao_mongo(operacao)
+    except HTTPException as e:
+        raise e
+    return {"message": "Operação criada com sucesso"}
 
 
 if __name__ == "__main__":

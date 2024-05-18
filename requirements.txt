@@ -7,8 +7,6 @@ pydub
 g4f
 pymongo==3.12.0
 dnspython
-sqlalchemy
-oauthlib
 mysql-connector-python
 # tenha instalado na maquina o ffmpeg
 # source venv/Scripts/activate
